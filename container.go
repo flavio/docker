@@ -253,7 +253,11 @@ func (container *Container) Attach(stdin io.ReadCloser, stdinCloser io.Closer, s
 				if container.Config.StdinOnce {
 					defer cStdin.Close()
 				}
-				_, err := CopyEscapable(cStdin, stdin)
+				if container.ptyMaster != nil {
+					_, err = CopyEscapable(cStdin, stdin)
+				} else {
+					_, err = io.Copy(cStdin, stdin)
+				}
 				if err != nil {
 					Debugf("[error] attach stdin: %s\n", err)
 				}
