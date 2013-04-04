@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/signal"
 )
 
 var GIT_COMMIT string
@@ -65,15 +64,6 @@ func runCommand(args []string) error {
 			return err
 		}
 		defer term.Restore(int(os.Stdin.Fd()), oldState)
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt)
-		go func() {
-			for _ = range c {
-				term.Restore(int(os.Stdin.Fd()), oldState)
-				log.Printf("\nSIGINT received\n")
-				os.Exit(0)
-			}
-		}()
 	}
 	// FIXME: we want to use unix sockets here, but net.UnixConn doesn't expose
 	// CloseWrite(), which we need to cleanly signal that stdin is closed without
